@@ -30,7 +30,11 @@ xquery version "3.0";
 (:  FUNCTIONS  :)
 
 (:~
+  Reschedule every XQuery job listed in the catalog. No previously-existing job will be overwritten. 
+  This is most useful after eXist DB has been restarted, since all jobs scheduled via XQuery will be 
+  cleared.
   
+  @return empty sequence.
 :)
 declare function pjs:reschedule-xquery-jobs() {
   for $job in $pjs:catalog//job
@@ -50,7 +54,7 @@ declare function pjs:reschedule-xquery-jobs() {
   return
     if ( $cron ) then
       pjs:schedule-xquery-cron-job($xq, $cron/data(.), $name, $params)
-    else ()
+    else () (: TODO: add periodic jobs :)
 };
 
 (:~
@@ -61,6 +65,7 @@ declare function pjs:reschedule-xquery-jobs() {
   @param cron-expression is the cron string representing when and for how long the job should run.
   @param job-name is the title given to the cron job. It must be unique to eXist's scheduler.
   @param job-parameters is an XML fragment containing parameter names and string values. E.g. `<parameters><param name="string" value="string"/></parameters>`
+  @return empty sequence.
 :)
 declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?) {
@@ -77,6 +82,7 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
   @param job-name is the title given to the cron job. It must be unique to eXist's scheduler.
   @param job-parameters is an XML fragment containing parameter names and string values. E.g. `<parameters><param name="string" value="string"/></parameters>`
   @param force is a boolean value. If true, a previously-scheduled job matching $job-name will be deleted before the new job is scheduled.
+  @return empty sequence.
 :)
 declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?, $force as xs:boolean) {
