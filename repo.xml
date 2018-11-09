@@ -1,12 +1,14 @@
 <meta xmlns="http://exist-db.org/xquery/repo">
-  <description></description>
-  <author>Ashley M. Clark</author>
+  <description>
+    </description>
+  <author>Ashley M. Clark, Northeastern University Women Writers Project</author>
   <website>https://www.wwp.northeastern.edu</website>
-  <status>alpha</status>
+  <status>stable</status>
   <license>GNU-LGPL</license>
   <copyright>true</copyright>
   <type>application</type>
   <target>persistent-scheduler</target>
+  <permissions password="" user="admin" group="dba" mode="rw-rw-r--"/>
   <prepare/>
-  <finish/>
+  <finish>content/post-install.xq</finish>
 </meta>

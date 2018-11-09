@@ -14,8 +14,10 @@ xquery version "3.0";
   XQuery jobs on installation, without requiring the user to edit eXist's configuration file for job 
   persistence.
   
+  All functions are limited to users in the "dba" group.
+  
   @author Ashley M. Clark, Northeastern University Women Writers Project
-  @version 0.0.2
+  @version 0.1.0
   @since November 9, 2018
 :)
  

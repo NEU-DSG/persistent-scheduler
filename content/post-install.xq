@@ -3,9 +3,6 @@ xquery version "3.1";
 (:  LIBRARIES  :)
   import module namespace console="http://exist-db.org/xquery/console";
   import module namespace sm="http://exist-db.org/xquery/securitymanager";
-(:  NAMESPACES  :)
-  declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-  (:declare option output:indent "no";:)
 
 (:~ 
   This script will be run after the package is installed into eXist DB.
