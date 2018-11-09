@@ -1,37 +1,30 @@
 xquery version "3.0";
 
-import module namespace console="http://exist-db.org/xquery/console";
-import module namespace sched="http://exist-db.org/xquery/scheduler";
-import module namespace util="http://exist-db.org/xquery/util";
-(: NAMESPACES :)
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+  import module namespace pjs="http://www.wwp.northeastern.edu/ns/persistent-scheduler" 
+    at "content/scheduler.xql";
+(:  NAMESPACES  :)
+  declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~
- : 
- :)
- 
-(: VARIABLES :)
-  declare variable $jobs := map { 
-    'Test job': map {
-      'xq': '/db/test/test-job.xq',
-      'cron': '0 0/5 * 1/1 * ? *',
-      'parameters': ()
-      }
-    };
+  Reschedule any catalogued persistent jobs.
   
-(: FUNCTIONS :)
+  This module is intended to be used programmatically. To enable this, add the user job below to 
+  EXIST_HOME/conf.xml, inside `/exist/scheduler`:
+      <job type="user" name="persistent-scheduler" 
+        xquery="/db/apps/persistent-scheduler/test-scheduler.xq"
+        period="5000" repeat="0" />
+  By adding a reference to this XQuery to conf.xml, the XQuery jobs will be rescheduled immediately 
+  after eXist DB starts back up.
+  
+  *Note:* While the Persistent Scheduler has safeguards built in, you should only add this script to
+  your eXist DB configuration if you have confidence that only trusted users can register a scheduled
+  job.
+  
+  If you can't (or prefer not to risk) rescheduling jobs programmatically, you should still be able to 
+  run this script yourself after restarting eXist and examining the contents of the job catalog.
+:)
+ 
 
-(: MAIN QUERY :)
+(:  MAIN QUERY  :)
 
-let $scheduling :=
-  for $job-name in map:keys($jobs)
-  let $job := $jobs($job-name)
-  return sched:schedule-xquery-cron-job(
-          $job?xq,
-          $job?cron,
-          $job-name,
-          $job?parameters
-          )
-return
-  util:log-system-out(sm:id())
-
+pjs:reschedule-xquery-jobs()

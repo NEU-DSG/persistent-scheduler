@@ -1,10 +1,10 @@
 xquery version "3.0";
 
-module namespace pcron="http://www.wwp.northeastern.edu/ns/persistent-scheduler";
-import module namespace repo="http://exist-db.org/xquery/repo";
-import module namespace sched="http://exist-db.org/xquery/scheduler";
+  module namespace pjs="http://www.wwp.northeastern.edu/ns/persistent-scheduler";
+  import module namespace repo="http://exist-db.org/xquery/repo";
+  import module namespace sched="http://exist-db.org/xquery/scheduler";
 (:  NAMESPACES  :)
-declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+  declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 
 (:~
   A wrapper library for the eXist DB scheduler module. Ordinarily, a user job scheduled through XQuery 
@@ -14,18 +14,44 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
   persistence.
   
   @author Ashley M. Clark, Northeastern University Women Writers Project
-  @version 0.0.1
+  @version 0.0.2
   @since November 9, 2018
 :)
  
 (:  VARIABLES  :)
-  declare %private variable $pcron:catalog := 
-    let $absPath := repo:get-root()
-    let $path := 'xmldb:exist://'||$absPath||'persistent-scheduler/data/catalog.xml'
-    return doc($path);
+  declare %private variable $pjs:app-root :=
+    let $appPath := repo:get-root()
+    return 'xmldb:exist://'||$appPath||'persistent-scheduler/';
+  declare %private variable $pjs:catalog := 
+    let $catalogPath := $pjs:app-root||'data/catalog.xml'
+    return doc($catalogPath);
 
 
 (:  FUNCTIONS  :)
+
+(:~
+  
+:)
+declare function pjs:reschedule-xquery-jobs() {
+  for $job in $pjs:catalog//job
+  let $xq := $job/@xquery/data(.)
+  let $cron := $job/@cron
+  let $name := $job/@name/data(.)
+  let $params := 
+    let $all := $job/parameter
+    return
+      if ( count($all) gt 0 ) then
+        <parameters> {
+          for $param in $all
+          return
+            <param name="{$param/@name}" value="{$param/@value}"/>
+        }</parameters>
+      else ()
+  return
+    if ( $cron ) then
+      pjs:schedule-xquery-cron-job($xq, $cron/data(.), $name, $params)
+    else ()
+};
 
 (:~
   Schedule a cron job implemented in XQuery. If a job already exists with the requested name, the task 
@@ -36,9 +62,9 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
   @param job-name is the title given to the cron job. It must be unique to eXist's scheduler.
   @param job-parameters is an XML fragment containing parameter names and string values. E.g. `<parameters><param name="string" value="string"/></parameters>`
 :)
-declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
+declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?) {
-  pcron:schedule-xquery-cron-job($xq-filepath, $cron-expression, $job-name, $job-parameters, false())
+  pjs:schedule-xquery-cron-job($xq-filepath, $cron-expression, $job-name, $job-parameters, false())
 };
 
 (:~
@@ -52,7 +78,7 @@ declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron
   @param job-parameters is an XML fragment containing parameter names and string values. E.g. `<parameters><param name="string" value="string"/></parameters>`
   @param force is a boolean value. If true, a previously-scheduled job matching $job-name will be deleted before the new job is scheduled.
 :)
-declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
+declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?, $force as xs:boolean) {
   let $previouslyScheduled :=
     exists(sched:get-scheduled-jobs()//sched:job[@name eq $job-name])
@@ -78,7 +104,7 @@ declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron
   return
     if ( $nowScheduled ) then
       (
-        pcron:update-job-in-catalog($jobListing),
+        pjs:update-job-in-catalog($jobListing),
         () (: LOG :)
       )
     else
@@ -90,13 +116,13 @@ declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron
 
 (: Create or update a scheduled job in the catalog. This should only be used when a job has been 
   successfully scheduled. :)
-declare %private function pcron:update-job-in-catalog($job as element()) {
+declare %private function pjs:update-job-in-catalog($job as element()) {
   let $jobName := $job/@name/data(.)
-  let $previousJob := $pcron:catalog//job[@name eq $jobName]
+  let $previousJob := $pjs:catalog//job[@name eq $jobName]
   return
     if ( exists($previousJob) ) then
       update replace $previousJob with $job
     else
-      update insert $job into $pcron:catalog/cron-jobs
+      update insert $job into $pjs:catalog/cron-jobs
 };
 
