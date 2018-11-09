@@ -5,6 +5,7 @@ xquery version "3.0";
   import module namespace sched="http://exist-db.org/xquery/scheduler";
 (:  NAMESPACES  :)
   declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+  declare option output:indent "yes";
 
 (:~
   A wrapper library for the eXist DB scheduler module. Ordinarily, a user job scheduled through XQuery 
@@ -25,6 +26,9 @@ xquery version "3.0";
   declare %private variable $pjs:catalog := 
     let $catalogPath := $pjs:app-root||'data/catalog.xml'
     return doc($catalogPath);
+  declare %private variable $pjs:log :=
+    let $logPath := $pjs:app-root||'data/activity-log.xml'
+    return doc($logPath);
 
 
 (:  FUNCTIONS  :)
@@ -111,14 +115,23 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
     if ( $nowScheduled ) then
       (
         pjs:update-job-in-catalog($jobListing),
-        () (: LOG :)
+        pjs:update-activity-log('Successfully scheduled job', $job-name, 'info')
       )
     else
-      () (: LOG :)
+      pjs:update-activity-log('Could not schedule job', $job-name, 'warn')
 };
 
 
 (:  FUNCTIONS, PRIVATE  :)
+
+(: Create a new log entry for (re)scheduling a job. :)
+declare %private function pjs:update-activity-log($message as xs:string, $job-name as xs:string, $status as xs:string) {
+  let $entry :=
+    <entry status="{$status}" name="{$job-name}" when="{current-dateTime()}">
+      { $message }</entry>
+  return
+    update insert $entry into $pjs:log/log
+};
 
 (: Create or update a scheduled job in the catalog. This should only be used when a job has been 
   successfully scheduled. :)
@@ -129,6 +142,6 @@ declare %private function pjs:update-job-in-catalog($job as element()) {
     if ( exists($previousJob) ) then
       update replace $previousJob with $job
     else
-      update insert $job into $pjs:catalog/cron-jobs
+      update insert $job into $pjs:catalog/jobs
 };
 
