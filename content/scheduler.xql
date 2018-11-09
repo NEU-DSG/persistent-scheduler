@@ -1,6 +1,7 @@
 xquery version "3.0";
 
 module namespace pcron="http://www.wwp.northeastern.edu/ns/persistent-scheduler";
+import module namespace repo="http://exist-db.org/xquery/repo";
 import module namespace sched="http://exist-db.org/xquery/scheduler";
 (:  NAMESPACES  :)
 declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
@@ -18,7 +19,10 @@ declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
 :)
  
 (:  VARIABLES  :)
-  declare %private variable $catalog := doc('data/catalog.xml');
+  declare %private variable $pcron:catalog := 
+    let $absPath := repo:get-root()
+    let $path := 'xmldb:exist://'||$absPath||'persistent-scheduler/data/catalog.xml'
+    return doc($path);
 
 
 (:  FUNCTIONS  :)
@@ -87,11 +91,12 @@ declare function pcron:schedule-xquery-cron-job($xq-filepath as xs:string, $cron
 (: Create or update a scheduled job in the catalog. This should only be used when a job has been 
   successfully scheduled. :)
 declare %private function pcron:update-job-in-catalog($job as element()) {
-  let $previousJob := $catalog//job[@name eq $job-name]
+  let $jobName := $job/@name/data(.)
+  let $previousJob := $pcron:catalog//job[@name eq $jobName]
   return
     if ( exists($previousJob) ) then
-      update replace $previousJob with $jobListing
+      update replace $previousJob with $job
     else
-      update insert $job into $catalog/cron-jobs
+      update insert $job into $pcron:catalog/cron-jobs
 };
 
