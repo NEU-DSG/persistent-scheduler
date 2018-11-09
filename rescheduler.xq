@@ -11,8 +11,8 @@ xquery version "3.0";
   This module is intended to be used programmatically. To enable this, add the user job below to 
   EXIST_HOME/conf.xml, inside `/exist/scheduler`:
       <job type="user" name="persistent-scheduler" 
-        xquery="/db/apps/persistent-scheduler/test-scheduler.xq"
-        period="5000" repeat="0" />
+          xquery="/db/apps/persistent-scheduler/rescheduler.xq"
+          period="5000" repeat="0" />
   By adding a reference to this XQuery to conf.xml, the XQuery jobs will be rescheduled immediately 
   after eXist DB starts back up.
   

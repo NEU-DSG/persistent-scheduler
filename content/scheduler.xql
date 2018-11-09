@@ -17,7 +17,7 @@ xquery version "3.0";
   All functions are limited to users in the "dba" group.
   
   @author Ashley M. Clark, Northeastern University Women Writers Project
-  @version 0.1.0
+  @version 0.1.1
   @since November 9, 2018
 :)
  
