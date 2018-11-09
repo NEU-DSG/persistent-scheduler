@@ -1,0 +1,11 @@
+<package xmlns="http://expath.org/ns/pkg" 
+    name="http://www.wwp.northeastern.edu/pkg/persistent-scheduler" abbrev="persistent-scheduler"
+    version="0.0.1" spec="1.0">
+  <title>Persistent Cron Job Scheduler</title>
+  <xquery>
+    <namespace>http://www.wwp.northeastern.edu/ns/persistent-scheduler</namespace>
+    <file>scheduler.xql</file>
+  </xquery>
+  
+  <dependency processor="http://exist-db.org" semver-min="4.4"/>
+</package>

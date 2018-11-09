@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cron-jobs>
+  <!--<job type="user" name="Greet" xquery="/db/greet.xq"
+      cron="0 0 1 1/1 * ?">
+    <parameter name="greeting" value="hello"/>
+  </job>-->
+  
+</cron-jobs>

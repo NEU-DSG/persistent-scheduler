@@ -1,0 +1,12 @@
+<meta xmlns="http://exist-db.org/xquery/repo">
+  <description></description>
+  <author>Ashley M. Clark</author>
+  <website>https://www.wwp.northeastern.edu</website>
+  <status>alpha</status>
+  <license>GNU-LGPL</license>
+  <copyright>true</copyright>
+  <type>application</type>
+  <target>persistent-scheduler</target>
+  <prepare/>
+  <finish/>
+</meta>
