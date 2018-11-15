@@ -1,4 +1,4 @@
-xquery version "3.1";
+xquery version "3.0";
 
 (:  LIBRARIES  :)
   import module namespace console="http://exist-db.org/xquery/console";

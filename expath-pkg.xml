@@ -2,7 +2,7 @@
     name="http://www.wwp.northeastern.edu/pkg/persistent-scheduler" abbrev="persistent-scheduler"
     version="0.1.1" spec="1.0">
   <title>Persistent Job Scheduler</title>
-  <dependency processor="eXist-db" semver-min="4.4"/>
+  <dependency processor="eXist-db" semver-min="2.2"/>
   
   <xquery>
     <namespace>http://www.wwp.northeastern.edu/ns/persistent-scheduler</namespace>
