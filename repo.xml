@@ -11,4 +11,6 @@
   <permissions password="" user="admin" group="dba" mode="rw-rw-r--"/>
   <prepare/>
   <finish>content/post-install.xq</finish>
+  
+  <changelog/>
 </meta>
