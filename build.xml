@@ -2,7 +2,7 @@
   <xmlproperty file="expath-pkg.xml"/>
   <property name="build.dir" value="build"/>
   <property name="project.version" value="${package(version)}"/>
-  <property name="project.app" value="persistent-scheduler"/>
+  <property name="project.app" value="${package(abbrev)}"/>
   
   <target name="xar">
     <mkdir dir="${build.dir}"/>
