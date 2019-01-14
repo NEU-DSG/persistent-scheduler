@@ -16,10 +16,10 @@ xquery version "3.0";
   
   All functions are limited to users in the "dba" group.
   
-  @author Ashley M. Clark, Northeastern University Women Writers Project
-  @version 0.1.2
-  @since November 9, 2018
-:)
+    @author Ashley M. Clark, Northeastern University Women Writers Project
+    @version 0.1.2
+    @since November 9, 2018
+  :)
  
 (:  VARIABLES  :)
   declare %private variable $pjs:app-root :=
