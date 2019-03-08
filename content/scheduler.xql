@@ -5,7 +5,6 @@ xquery version "3.0";
   import module namespace sched="http://exist-db.org/xquery/scheduler";
 (:  NAMESPACES  :)
   declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
-  declare option output:indent "yes";
 
 (:~
   A wrapper library for the eXist DB scheduler module. Ordinarily, a user job scheduled through XQuery 
