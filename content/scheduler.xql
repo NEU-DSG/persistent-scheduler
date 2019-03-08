@@ -55,24 +55,6 @@ declare function pjs:delete-persistent-job($job-name as xs:string) {
 };
 
 (:~
-  Unschedule an XQuery job listed in the catalog. The job will remain in the catalog, but eXist will not 
-  run it until it has been rescheduled.
-  
-  @param job-name is the title given to the persistent job.
-  @return empty sequence.
- :)
-declare function pjs:unschedule-job($job-name as xs:string) {
-  if ( pjs:test-job-existence($job-name) ) then
-    let $isUnscheduled := sched:delete-scheduled-job($job-name)
-    return
-      if ( $isUnscheduled ) then
-        pjs:update-activity-log("Unscheduled job", $job-name, 'info')
-      else 
-        pjs:update-activity-log("Could not unschedule job", $job-name, 'warn')
-  else ()
-};
-
-(:~
   Reschedule every XQuery job listed in the catalog. No previously-existing job will be overwritten. 
   This is most useful after eXist DB has been restarted, since all jobs scheduled via XQuery will be 
   cleared.
@@ -129,7 +111,7 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
 :)
 declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?, $force as xs:boolean) {
-  let $previouslyScheduled := pjs:test-job-existence($job-name)
+  let $previouslyScheduled := pjs:job-exists($job-name)
   let $nowScheduled :=
     if ( $previouslyScheduled and not($force) ) then
       false()
@@ -159,11 +141,30 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
       pjs:update-activity-log('Could not schedule job', $job-name, 'warn')
 };
 
+(:~
+  Unschedule an XQuery job listed in the catalog. The job will remain in the catalog, but eXist will not 
+  run it until it has been rescheduled.
+  
+  @param job-name is the title given to the persistent job.
+  @return empty sequence.
+ :)
+declare function pjs:unschedule-job($job-name as xs:string) {
+  if ( pjs:job-exists($job-name) ) then
+    let $isUnscheduled := sched:delete-scheduled-job($job-name)
+    return
+      if ( $isUnscheduled ) then
+        pjs:update-activity-log("Unscheduled job", $job-name, 'info')
+      else 
+        pjs:update-activity-log("Could not unschedule job", $job-name, 'warn')
+  else ()
+};
+
 
 (:  FUNCTIONS, PRIVATE  :)
 
-(:  :)
-declare %private function pjs:test-job-existence($job-name) {
+(: Test if a job exists in the catalog. (If it doesn't exist there, it is beyond the scope of this 
+  application. :)
+declare %private function pjs:job-exists($job-name) as xs:boolean {
   exists(sched:get-scheduled-jobs()//sched:job[@name eq $job-name])
 };
 
