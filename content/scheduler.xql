@@ -16,7 +16,7 @@ xquery version "3.0";
   All functions are limited to users in the "dba" group.
   
     @author Ashley M. Clark, Northeastern University Women Writers Project
-    @version 0.1.2
+    @version 0.2.0
     @since November 9, 2018
   :)
  
@@ -35,12 +35,50 @@ xquery version "3.0";
 (:  FUNCTIONS  :)
 
 (:~
+  Unschedule and delete an XQuery job from the catalog. If the job does not exist in the catalog, 
+  nothing is done.
+  
+  @param job-name is the title given to the persistent job.
+  @return empty sequence.
+ :)
+declare function pjs:delete-persistent-job($job-name as xs:string) {
+  let $job := $pjs:catalog//job[@name eq $job-name]
+  return
+    if ( exists($job) ) then 
+      (
+        pjs:unschedule-job($job-name),
+        update delete $job
+        ,
+        pjs:update-activity-log("Removed job from catalog", $job-name, 'info')
+      )
+    else ()
+};
+
+(:~
+  Unschedule an XQuery job listed in the catalog. The job will remain in the catalog, but eXist will not 
+  run it until it has been rescheduled.
+  
+  @param job-name is the title given to the persistent job.
+  @return empty sequence.
+ :)
+declare function pjs:unschedule-job($job-name as xs:string) {
+  if ( pjs:test-job-existence($job-name) ) then
+    let $isUnscheduled := sched:delete-scheduled-job($job-name)
+    return
+      if ( $isUnscheduled ) then
+        pjs:update-activity-log("Unscheduled job", $job-name, 'info')
+      else 
+        pjs:update-activity-log("Could not unschedule job", $job-name, 'warn')
+  else ()
+};
+
+(:~
   Reschedule every XQuery job listed in the catalog. No previously-existing job will be overwritten. 
   This is most useful after eXist DB has been restarted, since all jobs scheduled via XQuery will be 
   cleared.
   
   @return empty sequence.
-:)
+ :)
 declare function pjs:reschedule-xquery-jobs() {
   for $job in $pjs:catalog//job
   let $xq := $job/@xquery/data(.)
@@ -91,8 +129,7 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
 :)
 declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-expression as xs:string, 
                                                 $job-name as xs:string, $job-parameters as element()?, $force as xs:boolean) {
-  let $previouslyScheduled :=
-    exists(sched:get-scheduled-jobs()//sched:job[@name eq $job-name])
+  let $previouslyScheduled := pjs:test-job-existence($job-name)
   let $nowScheduled :=
     if ( $previouslyScheduled and not($force) ) then
       false()
@@ -124,6 +161,11 @@ declare function pjs:schedule-xquery-cron-job($xq-filepath as xs:string, $cron-e
 
 
 (:  FUNCTIONS, PRIVATE  :)
+
+(:  :)
+declare %private function pjs:test-job-existence($job-name) {
+  exists(sched:get-scheduled-jobs()//sched:job[@name eq $job-name])
+};
 
 (: Create a new log entry for (re)scheduling a job. :)
 declare %private function pjs:update-activity-log($message as xs:string, $job-name as xs:string, $status as xs:string) {
